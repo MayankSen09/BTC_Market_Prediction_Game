@@ -1,53 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { BattlefieldCanvas } from './components/BattlefieldCanvas';
-import { HeaderHUD } from './components/HeaderHUD';
-import { OrderBookDepthChart } from './components/OrderBookDepthChart';
-import { LiveBattleFeed } from './components/LiveBattleFeed';
-import { BattleControls } from './components/BattleControls';
-import { WarCommanderPanel } from './components/WarCommanderPanel';
-import { marketEngine } from './services/marketData';
+import React, { useState } from 'react';
+import { LandingPage } from './features/landing/LandingPage';
+import { WarRoom } from './features/warroom/WarRoom';
+import { CommanderProfile } from './features/commander/CommanderProfile';
+import { Leaderboards } from './features/leaderboard/Leaderboards';
+import { Missions } from './features/missions/Missions';
+import { ReplaySystem } from './features/replay/ReplaySystem';
+import { Swords, Award, Trophy, Target, Film, ArrowLeft } from 'lucide-react';
+import { Button } from './components/ui/Button';
 
 export function App() {
-  const [cameraMode, setCameraMode] = useState('ISOMETRIC');
-  const [isCommanderOpen, setIsCommanderOpen] = useState(false);
-
-  useEffect(() => {
-    // Initialize live market data stream
-    marketEngine.init();
-  }, []);
+  const [currentView, setCurrentView] = useState('LANDING'); // LANDING, WAR_ROOM, PROFILE, LEADERBOARDS, MISSIONS, REPLAY
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-950 select-none">
-      {/* 3D WebGL Battlefield Canvas */}
-      <BattlefieldCanvas cameraMode={cameraMode} />
+    <div className="min-h-screen w-screen bg-[#080C14] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
+      
+      {/* Persistent View Switcher Bar for sub-pages */}
+      {currentView !== 'LANDING' && currentView !== 'WAR_ROOM' && (
+        <header className="w-full bg-[#0D1320] border-b border-white/10 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => setCurrentView('WAR_ROOM')}>
+              <ArrowLeft className="w-4 h-4 mr-1" /> BACK TO WAR ROOM
+            </Button>
+          </div>
 
-      {/* Top Header HUD Overlay */}
-      <HeaderHUD />
+          <div className="flex items-center gap-2 font-mono text-xs">
+            <button
+              onClick={() => setCurrentView('WAR_ROOM')}
+              className={`px-3 py-1.5 rounded font-bold transition-all ${
+                currentView === 'WAR_ROOM' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              WAR ROOM
+            </button>
+            <button
+              onClick={() => setCurrentView('PROFILE')}
+              className={`px-3 py-1.5 rounded font-bold transition-all ${
+                currentView === 'PROFILE' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              PROFILE
+            </button>
+            <button
+              onClick={() => setCurrentView('LEADERBOARDS')}
+              className={`px-3 py-1.5 rounded font-bold transition-all ${
+                currentView === 'LEADERBOARDS' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              LEADERBOARDS
+            </button>
+            <button
+              onClick={() => setCurrentView('MISSIONS')}
+              className={`px-3 py-1.5 rounded font-bold transition-all ${
+                currentView === 'MISSIONS' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              MISSIONS
+            </button>
+            <button
+              onClick={() => setCurrentView('REPLAY')}
+              className={`px-3 py-1.5 rounded font-bold transition-all ${
+                currentView === 'REPLAY' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              REPLAY
+            </button>
+          </div>
+        </header>
+      )}
 
-      {/* Bottom Floating Control Bar */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full max-w-2xl px-4 flex justify-center">
-        <BattleControls
-          cameraMode={cameraMode}
-          setCameraMode={setCameraMode}
-          onOpenCommander={() => setIsCommanderOpen(true)}
-        />
-      </div>
-
-      {/* Bottom Left: Order Book Spot Depth Curve Overlay */}
-      <div className="absolute bottom-5 left-5 z-20 pointer-events-none hidden md:block">
-        <OrderBookDepthChart />
-      </div>
-
-      {/* Bottom Right: Live Market & Combat Feed Overlay */}
-      <div className="absolute bottom-5 right-5 z-20 pointer-events-none hidden md:block">
-        <LiveBattleFeed />
-      </div>
-
-      {/* War Commander Prediction Game Modal */}
-      <WarCommanderPanel
-        isOpen={isCommanderOpen}
-        onClose={() => setIsCommanderOpen(false)}
-      />
+      {/* Render Active View */}
+      {currentView === 'LANDING' && <LandingPage onEnterWarRoom={() => setCurrentView('WAR_ROOM')} />}
+      {currentView === 'WAR_ROOM' && <WarRoom onBackToLanding={() => setCurrentView('LANDING')} />}
+      {currentView === 'PROFILE' && <CommanderProfile />}
+      {currentView === 'LEADERBOARDS' && <Leaderboards />}
+      {currentView === 'MISSIONS' && <Missions />}
+      {currentView === 'REPLAY' && <ReplaySystem />}
     </div>
   );
 }
